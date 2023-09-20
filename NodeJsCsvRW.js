@@ -13,42 +13,42 @@ fs.readFile("./家計簿.csv", "utf8",
         }
 
         let output = "";
-        let rowNum = 0;
+        let columnNum = 0;
         let totalUsed = 0;
-        const columns = data.split("\n");
+        const rows = data.split("\n");
         let isError = false;
 
-        for(let c = 0; c < columns.length; c++)
+        for(let r = 0; r < rows.length; r++)
         {
-            const rows = columns[c].split(",");
-            if(rows.length > 0 && rows[0] != "")
+            const columns = rows[r].split(",");
+            if(columns.length > 0 && columns[0] != "")
             {
                 //品名、支出はそのまま出力
-                for(let r = 0; r < rows.length; r++)
+                for(let c = 0; c < columns.length; c++)
                 {
-                    output += rows[r];
-                    if(r < rows.length - 1)
+                    output += columns[c];
+                    if(c < columns.length - 1)
                     {
                         output += ",";
                     }
                 }
                 //合計金額の加算
-                if(rows.length > 1 && rows[1] != "" && c > 0)
+                if(columns.length > 1 && columns[1] != "" && r > 0)
                 {
-                    totalUsed += Number(rows[1]);
+                    totalUsed += Number(columns[1]);
                 }
-                else if(rows.length <= 1 || rows[1] == "")
+                else if(columns.length <= 1 || columns[1] == "")
                 {
-                    console.log("行" + (c + 1) + ": 支出列が記載されていません");
+                    console.log("行" + (r + 1) + ": 支出列が記載されていません");
                     isError = true;
                     break;
                 }
                 output += "\n";
-                rowNum = rows.length;
+                columnNum = columns.length;
             }
         }
         //空行
-        for(let r = 0; r < rowNum - 1; r++)
+        for(let c = 0; c < columnNum - 1; c++)
         {
             output += ",";
         }
@@ -58,7 +58,7 @@ fs.readFile("./家計簿.csv", "utf8",
         output += "合計,";
         output += totalUsed;
         output += ","
-        for(let r = 2; r < rowNum - 1; r++)
+        for(let c = 2; c < columnNum - 1; c++)
         {
             output += ",";
         }
