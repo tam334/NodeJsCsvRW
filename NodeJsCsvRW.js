@@ -5,6 +5,13 @@ var fs = require("fs")
 fs.readFile("./家計簿.csv", "utf8",
     function(error, data)
     {
+        if(error)
+        {
+            console.log("家計簿.csvの読み取りエラー");
+            console.log(error);
+            return;
+        }
+
         let output = "";
         let rowNum = 0;
         let totalUsed = 0;
