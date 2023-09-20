@@ -26,14 +26,8 @@ fs.readFile("./家計簿.csv", "utf8",
             if(columns.length > 0 && columns[0] != "")
             {
                 //品名、支出はそのまま出力
-                for(let c = 0; c < columns.length; c++)
-                {
-                    output += columns[c];
-                    if(c < columns.length - 1)
-                    {
-                        output += ",";
-                    }
-                }
+                output += rows[r] + "\n";
+
                 //合計金額の加算
                 if(columns.length > 1 && columns[1] != "" && r > 0)
                 {
@@ -45,26 +39,15 @@ fs.readFile("./家計簿.csv", "utf8",
                     isError = true;
                     break;
                 }
-                output += "\n";
                 columnNum = columns.length;
             }
         }
         //空行
-        for(let c = 0; c < columnNum - 1; c++)
-        {
-            output += ",";
-        }
-        output += "\r\n";
+        output += EmptyRow(columnNum);
 
         //合計
-        output += "合計,";
-        output += totalUsed;
-        output += ","
-        for(let c = 2; c < columnNum - 1; c++)
-        {
-            output += ",";
-        }
-        output += "\r\n";
+        output += TotalUsedRow(totalUsed, columnNum);
+
         if(!isError)
         {
             fs.writeFile("./家計簿_合計記入済み.csv", output,
@@ -80,3 +63,43 @@ fs.readFile("./家計簿.csv", "utf8",
         }
     }
 );
+
+/// <summary>
+/// 空行の書き込み
+/// </summary>
+/// <param name="columnNum">
+/// 列数
+/// </param>
+function EmptyRow(columnNum)
+{
+    let output = "";
+    for(let c = 0; c < columnNum - 1; c++)
+    {
+        output += ",";
+    }
+    output += "\r\n";
+    return output;
+}
+
+/// <summary>
+/// 合計支出の行の書き込み
+/// </summary>
+/// <param name="totalUsed">
+/// 合計支出、数値
+/// </param>
+/// <param name="columnNum">
+/// 合計支出、数値
+/// </param>
+function TotalUsedRow(totalUsed, columnNum)
+{
+    let output = "";
+    output += "合計,";
+    output += totalUsed;
+    output += ","
+    for(let c = 2; c < columnNum - 1; c++)
+    {
+        output += ",";
+    }
+    output += "\r\n";
+    return output;
+}
