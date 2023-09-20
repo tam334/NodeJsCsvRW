@@ -65,7 +65,16 @@ fs.readFile("./家計簿.csv", "utf8",
         output += "\r\n";
         if(!isError)
         {
-            fs.writeFileSync("./家計簿_合計記入済み.csv", output);
+            fs.writeFile("./家計簿_合計記入済み.csv", output,
+                function(error)
+                {
+                    if(error)
+                    {
+                        console.log("家計簿_合計記入済み.csvの書き込みエラー");
+                        console.log(error);
+                    }
+                }
+            );
         }
     }
 );
