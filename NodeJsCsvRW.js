@@ -9,6 +9,8 @@ fs.readFile("./家計簿.csv", "utf8",
         let rowNum = 0;
         let totalUsed = 0;
         const columns = data.split("\n");
+        let isError = false;
+
         for(let c = 0; c < columns.length; c++)
         {
             const rows = columns[c].split(",");
@@ -24,9 +26,15 @@ fs.readFile("./家計簿.csv", "utf8",
                     }
                 }
                 //合計金額の加算
-                if(rows.length > 1 && c > 0)
+                if(rows.length > 1 && rows[1] != "" && c > 0)
                 {
                     totalUsed += Number(rows[1]);
+                }
+                else if(rows.length <= 1 || rows[1] == "")
+                {
+                    console.log("行" + (c + 1) + ": 支出列が記載されていません");
+                    isError = true;
+                    break;
                 }
                 output += "\n";
                 rowNum = rows.length;
@@ -48,6 +56,9 @@ fs.readFile("./家計簿.csv", "utf8",
             output += ",";
         }
         output += "\r\n";
-        fs.writeFileSync("./家計簿_合計記入済み.csv", output);
+        if(!isError)
+        {
+            fs.writeFileSync("./家計簿_合計記入済み.csv", output);
+        }
     }
 );
