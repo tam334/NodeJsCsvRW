@@ -3,6 +3,7 @@
 
 "use strict"
 
+var csvParse = require("./CsvParse.js");
 var fs = require("fs")
 fs.readFile("./家計簿.csv", "utf8",
     function(error, data)
@@ -17,16 +18,31 @@ fs.readFile("./家計簿.csv", "utf8",
         let output = "";
         let columnNum = 0;
         let totalUsed = 0;
-        const rows = data.split("\n");
+        const csv = csvParse.Parse(data);
         let isError = false;
 
-        for(let r = 0; r < rows.length; r++)
+        for(let r = 0; r < csv.length; r++)
         {
-            const columns = rows[r].split(",");
+            const columns = csv[r];
             if(columns.length > 0 && columns[0] != "")
             {
                 //品名、支出はそのまま出力
-                output += rows[r] + "\n";
+                for(let c = 0 ; c < columns.length; c++)
+                {
+                    if(columns[c].includes(","))
+                    {
+                        output += "\"" + columns[c] + "\"";
+                    }
+                    else
+                    {
+                        output += columns[c];
+                    }
+                    if(c < columns.length - 1)
+                    {
+                        output += ",";
+                    }
+                }
+                output += "\n";
 
                 //合計金額の加算
                 if(columns.length > 1 && columns[1] != "" && r > 0)
