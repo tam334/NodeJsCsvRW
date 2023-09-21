@@ -157,9 +157,6 @@ function ParseAnyString(dst, csv, currentIndex)
 /// <summary>
 /// 次の文字が終端でなく、nextであるか
 /// </summary>
-/// <param name="currentIndexPrim">
-/// 現在の解析位置、数値型
-/// </param>
 function CheckNextChar(csv, currentIndex, next)
 {
     if(typeof currentIndex != "number")
