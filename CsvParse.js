@@ -15,7 +15,7 @@
 exports.Parse = function(text)
 {
     let dst = [];
-    let currentIndex = [0];
+    let currentIndex = 0;
     ParseCSV(dst, text, currentIndex);
     return dst;
 }
@@ -28,16 +28,17 @@ exports.Parse = function(text)
 /// </param>
 function ParseCSV(dst, csv, currentIndex)
 {
-    ParseRow(dst, csv, currentIndex);
-    while (CheckNextChar(csv, currentIndex[0], '\r'))
+    currentIndex = ParseRow(dst, csv, currentIndex);
+    while (CheckNextChar(csv, currentIndex, '\r'))
     {
-        ParseNewLine(csv, currentIndex);
-        ParseRow(dst, csv, currentIndex);
+        currentIndex = ParseNewLine(csv, currentIndex);
+        currentIndex = ParseRow(dst, csv, currentIndex);
     }
-    if (CheckNextChar(csv, currentIndex[0], '\r'))
+    if (CheckNextChar(csv, currentIndex, '\r'))
     {
-        ParseNewLine(csv, currentIndex);
+        currentIndex = ParseNewLine(csv, currentIndex);
     }
+    return currentIndex;
 }
 
 /// <summary>
@@ -47,25 +48,33 @@ function ParseRow(dst, csv, currentIndex)
 {
     let columns = [];
 
-    columns.push(ParseColumn(dst, csv, currentIndex));
-    while (CheckNextChar(csv, currentIndex[0], ','))
+    let result = ParseColumn(dst, csv, currentIndex);
+    currentIndex = result[0];
+    columns.push(result[1]);
+    while (CheckNextChar(csv, currentIndex, ','))
     {
-        currentIndex[0]++;
-        columns.push(ParseColumn(dst, csv, currentIndex));
+        currentIndex++;
+        result = ParseColumn(dst, csv, currentIndex);
+        currentIndex = result[0];
+        columns.push(result[1]);
     }
 
     if(columns.length > 0)
     {
         dst.push(columns);
     }
+    return currentIndex;
 }
 
 /// <summary>
 /// 任意の文字列のパーズ
 /// </summary>
+/// <return>
+/// 配列、0:進めた後のindex 1:文字列
+/// </return>
 function ParseColumn(dst, csv, currentIndex)
 {
-    if(CheckNextChar(csv, currentIndex[0], '"'))
+    if(CheckNextChar(csv, currentIndex, '"'))
     {
         return ParseAnyString(dst, csv, currentIndex);
     }
@@ -80,50 +89,57 @@ function ParseColumn(dst, csv, currentIndex)
 /// </summary>
 function ParseNewLine(csv, currentIndex)
 {
-    if (CheckNextChar(csv, currentIndex[0], '\r'))
+    if (CheckNextChar(csv, currentIndex, '\r'))
     {
-        currentIndex[0]++;
+        currentIndex++;
     }
-    if (CheckNextChar(csv, currentIndex[0], '\n'))
+    if (CheckNextChar(csv, currentIndex, '\n'))
     {
-        currentIndex[0]++;
+        currentIndex++;
     }
+    return currentIndex;
 }
 
 /// <summary>
 /// トークンのパーズ
 /// </summary>
+/// <return>
+/// 配列、0:進めた後のindex 1:文字列
+/// </return>
 function ParseToken(dst, csv, currentIndex)
 {
     let adv = 0;
-    for (adv = 0; adv + currentIndex[0] < csv.length; adv++)
+    for (adv = 0; adv + currentIndex < csv.length; adv++)
     {
-        if (CheckNextChar(csv, currentIndex[0] + adv, ',') ||
-            CheckNextChar(csv, currentIndex[0] + adv, '\r'))
+        if (CheckNextChar(csv, currentIndex + adv, ',') ||
+            CheckNextChar(csv, currentIndex + adv, '\r'))
         {
             break;
         }
     }
-    currentIndex[0] += adv;
+    currentIndex += adv;
 
-    return csv.substring(currentIndex[0] - adv, currentIndex[0]);
+    return [currentIndex, csv.substring(currentIndex - adv, currentIndex)];
 }
 
 /// <summary>
 /// 行のパーズ
 /// </summary>
+/// <return>
+/// 配列、0:進めた後のindex 1:文字列
+/// </return>
 function ParseAnyString(dst, csv, currentIndex)
 {
-    if (CheckNextChar(csv, currentIndex[0], '"'))
+    if (CheckNextChar(csv, currentIndex, '"'))
     {
-        currentIndex[0]++;
+        currentIndex++;
     }
     let adv = 0;
-    for(adv = 0; adv + currentIndex[0] < csv.length; adv++)
+    for(adv = 0; adv + currentIndex < csv.length; adv++)
     {
-        if(CheckNextChar(csv, currentIndex[0] + adv, '"'))
+        if(CheckNextChar(csv, currentIndex + adv, '"'))
         {
-            if(CheckNextChar(csv, currentIndex[0] + adv + 1, '"'))
+            if(CheckNextChar(csv, currentIndex + adv + 1, '"'))
             {
                 adv += 1;
             }
@@ -133,9 +149,9 @@ function ParseAnyString(dst, csv, currentIndex)
             }
         }
     }
-    currentIndex[0] += adv + 1;
+    currentIndex += adv + 1;
 
-    return csv.substring(currentIndex[0] - adv - 1, currentIndex[0] - 1);
+    return [currentIndex, csv.substring(currentIndex - adv - 1, currentIndex - 1)];
 }
 
 /// <summary>
@@ -144,12 +160,12 @@ function ParseAnyString(dst, csv, currentIndex)
 /// <param name="currentIndexPrim">
 /// 現在の解析位置、数値型
 /// </param>
-function CheckNextChar(csv, currentIndexPrim, next)
+function CheckNextChar(csv, currentIndex, next)
 {
-    if(typeof currentIndexPrim != "number")
+    if(typeof currentIndex != "number")
     {
         console.log("Warning: currentIndexPrim is not a number.");
         console.trace();
     }
-    return csv.length > currentIndexPrim && csv[currentIndexPrim] == next;
+    return csv.length > currentIndex && csv[currentIndex] == next;
 }
